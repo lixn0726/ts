@@ -1,9 +1,9 @@
-package indl.lixn.ts.job.component;
+package indl.lixn.ts.core.job;
 
 /**
  * @author lixn
  * @description
- * @date 2023/02/15 14:11
+ * @date 2023/02/16 15:44
  **/
 public interface JobContent {
 

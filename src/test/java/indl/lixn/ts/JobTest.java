@@ -14,8 +14,5 @@ public class JobTest {
 
     }
 
-    static class MyJob {
-
-    }
 
 }
