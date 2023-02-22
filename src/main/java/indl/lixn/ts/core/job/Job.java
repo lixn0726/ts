@@ -21,7 +21,9 @@ public interface Job {
 
     long getTimeAsMillis();
 
-    int getTimeAsSeconds();
+    int getExecutionTimeAsSeconds();
+
+    int getSubmissionTimeAsSeconds();
 
     boolean isPeriodic();
 }

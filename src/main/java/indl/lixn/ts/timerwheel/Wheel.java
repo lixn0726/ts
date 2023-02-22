@@ -7,7 +7,7 @@ import indl.lixn.ts.util.TimeUtils;
 import lombok.Data;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * @author lixn
@@ -20,21 +20,29 @@ public class Wheel {
     private Id id;
 
     private Wheel upper;
+
     private Wheel lower;
 
     private int pointer;
 
     private WheelNode[] nodes;
 
+    // 相当于Netty的ticksPerWheel
     private int bucketSize;
 
+    // 单个bucket的时间间隔
     private int tickDuration;
 
+    private int tickDurationAsSecond;
+
+    // 时间单位
     private TimeUnit unit;
 
     private int currentInterval;
 
     private final int maxInterval = tickDuration * bucketSize;
+
+    private int maxIntervalInSecond;
 
     private boolean start = false;
 
@@ -42,37 +50,65 @@ public class Wheel {
 
     private boolean pause = false;
 
-    public Wheel() {
-        this.bucketSize = 64;
+    private Thread scanner;
 
+    private ExecutorService singleThreadPool = new ThreadPoolExecutor(1, 1, Long.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+
+    public Wheel() {
+        this(64);
+    }
+
+    public Wheel(int bucketSize) {
+        this(bucketSize, null, null);
+    }
+
+    public Wheel(int bucketSize, Wheel upper, Wheel lower) {
+        this.bucketSize = bucketSize;
+        this.upper = upper;
+        this.lower = lower;
+        this.scanner = new Thread(new Scanner());
+        this.tickDurationAsSecond = TimeUtils.transformToSecond(this.tickDuration, this.unit);
+        initNodeArray();
+    }
+
+    private void initNodeArray() {
+        this.nodes = new WheelNode[this.bucketSize];
+        WheelNode[] nodeArray = this.nodes;
+        for (int i = 0; i < nodeArray.length; i++) {
+            // 如果不new，那么每个元素默认为null
+            this.nodes[i] = new WheelNode();
+        }
     }
 
     public void addJob(Job job) {
         int nodeIndex = getPlacementIndex(job);
-        checkNodeNotNull(nodeIndex);
         WheelNode node = nodes[nodeIndex];
         node.addJob(job);
     }
 
-    // TODO 我个人感觉这里的synchronized是有必要的，但是有没有更好的办法去处理呢
-    private synchronized void checkNodeNotNull(int nodeIndex) {
-        WheelNode node = nodes[nodeIndex];
-        if (node == null) {
-            nodes[nodeIndex] = new WheelNode();
-        }
+    public void addJob(Job job, int diff) {
+        // TODO
     }
-    
+
     private class Scanner implements Runnable {
         @Override
         public void run() {
-            while (true) {
-                int interval = currentInterval;
-                List<Job> toDoJobs = nodes[pointer].getJobs();
-                if (isBottom()) {
-                    executeJobs(toDoJobs);
-                } else {
-                    repositionJobsToLower(toDoJobs);
+            try {
+                while (isRunning()) {
+                    // 先执行，再移动
+                    List<Job> executableJobs = nodes[pointer].getJobs();
+                    if (isBottomWheel()) {
+                        executeJobs(executableJobs);
+                    } else {
+                        repositionJobsToLower(executableJobs);
+                    }
+                    movePointer();
                 }
+            } catch (Exception ex) {
+                throw new TsException("Wheel - " + getId().getAsString() + " inner scanner working error.",
+                        ex.getCause());
+            } finally {
+                stop();
             }
         }
     }
@@ -85,21 +121,24 @@ public class Wheel {
 
     private void movePointer() {
         this.pointer++;
-        // 转了一圈了
         if (this.pointer == maxInterval) {
             pointer %= maxInterval;
-            upper.movePointer();
+            getUpper().movePointer();
+        }
+        try {
+            Thread.sleep(this.tickDuration);
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 
     private int getPlacementIndex(Job job) {
-        int gap = job.getTimeAsSeconds() - TimeUtils.currentTimestampInSeconds();
-        if (gap > this.maxInterval) {
-            // TODO 应该在这里触发吗
+        int gapAsSecond = job.getExecutionTimeAsSeconds() - TimeUtils.currentTimeAsSecond();
+        if (gapAsSecond > this.maxInterval) {
             // 该层次的时间轮装不下，需要存到更高层级的去。
             repositionJobsToUpper(job);
         }
-        return (gap + this.pointer) % this.maxInterval;
+        return (gapAsSecond + this.pointer) % this.maxInterval;
     }
 
     private void repositionJobsToUpper(Job job) {
@@ -111,7 +150,6 @@ public class Wheel {
                 "Please check your setting and then submit again");
     }
 
-    // 放着
     private void repositionJobsToUpper(List<Job> jobs) {
         if (hasUpper()) {
             for (Job job : jobs) {
@@ -141,7 +179,7 @@ public class Wheel {
                 "should reposition jobs to lower. But lower TimerWheel is not exist.");
     }
 
-    public boolean isBottom() {
+    public boolean isBottomWheel() {
         return this.getLower() == null;
     }
 
@@ -177,6 +215,7 @@ public class Wheel {
             this.start = true;
             this.stop = false;
             this.pause = false;
+            this.scanner.start();
         }
     }
 

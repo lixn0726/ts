@@ -1,6 +1,10 @@
 package indl.lixn.ts;
 
+import indl.lixn.ts.timerwheel.JobExecutionWheel;
+import indl.lixn.ts.timerwheel.MJob;
 import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author lixn
@@ -25,7 +29,7 @@ public class TimeWheelTest {
 //            @Override
 //            public JobContent getContent() {
 //                return () -> {
-//                    System.out.println("Child JobContent >>> now Running at time : " + TimeUtils.currentTimestampInSeconds());
+//                    System.out.println("Child JobContent >>> now Running at time : " + TimeUtils.currentTimeAsSecond());
 //                };
 //            }
 //
@@ -50,8 +54,8 @@ public class TimeWheelTest {
 //            }
 //
 //            @Override
-//            public int getTimeAsSeconds() {
-//                return TimeUtils.currentTimestampInSeconds() + 3;
+//            public int getExecutionTimeAsSeconds() {
+//                return TimeUtils.currentTimeAsSecond() + 3;
 //            }
 //
 //            @Override
@@ -69,7 +73,7 @@ public class TimeWheelTest {
 //            @Override
 //            public JobContent getContent() {
 //                return () -> {
-//                    System.out.println("Upper JobContent >>> now Running at time : " + TimeUtils.currentTimestampInSeconds());
+//                    System.out.println("Upper JobContent >>> now Running at time : " + TimeUtils.currentTimeAsSecond());
 //                };
 //            }
 //
@@ -94,8 +98,8 @@ public class TimeWheelTest {
 //            }
 //
 //            @Override
-//            public int getTimeAsSeconds() {
-//                return TimeUtils.currentTimestampInSeconds();
+//            public int getExecutionTimeAsSeconds() {
+//                return TimeUtils.currentTimeAsSecond();
 //            }
 //
 //            @Override
@@ -118,4 +122,22 @@ public class TimeWheelTest {
 //        TimeUnit.MINUTES.sleep(2);
     }
 
+    @Test
+    public void test_isWheelRunNormally() throws Exception {
+        // 0
+        JobExecutionWheel wheel = new JobExecutionWheel();
+
+        // 1
+        JobExecutionWheel upperWheel = new JobExecutionWheel(60, 1, TimeUnit.MINUTES);
+        wheel.setUpperLayer(upperWheel);
+
+        wheel.addJob(new MJob(30)); // 0 -
+        wheel.addJob(new MJob(90));
+        wheel.addJob(new MJob(60));
+        wheel.addJob(new MJob(10));
+
+        wheel.startScanner();
+
+        TimeUnit.SECONDS.sleep(120);
+    }
 }

@@ -2,8 +2,10 @@ package indl.lixn.ts.core.job.impl;
 
 import indl.lixn.ts.common.exception.TsException;
 import indl.lixn.ts.core.job.JobTimeConfig;
+import indl.lixn.ts.util.TimeUtils;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -20,7 +22,7 @@ public class FormattedTimeConfig implements JobTimeConfig {
 
     private static final Map<String, SimpleDateFormat> formatterByTimeExpression = new ConcurrentHashMap<>();
 
-    private final long timestamp;
+    private long timestamp;
 
     static {
         formatterByTimeExpression.put(DEFAULT_FORMAT, DEFAULT_FORMATTER);
@@ -33,7 +35,12 @@ public class FormattedTimeConfig implements JobTimeConfig {
     public FormattedTimeConfig(String formattedTimeStr, String dateFormat) {
         SimpleDateFormat formatter = getFormatter(dateFormat);
         try {
-            this.timestamp = formatter.parse(formattedTimeStr).getTime();
+            Date date = formatter.parse(formattedTimeStr);
+            if (date.before(new Date())) {
+                // TODO 该怎么处理呢
+                return;
+            }
+            this.timestamp = date.getTime();
         } catch (Exception ex) {
             throw new TsException("Parse error. Check that whether your timeStr and format is correct or not",
                     ex.getCause());
