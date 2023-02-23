@@ -6,4 +6,7 @@ package indl.lixn.ts.core.job;
  * @date 2023/02/16 15:44
  **/
 public interface JobDescription {
+
+    String getDescription();
+
 }

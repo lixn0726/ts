@@ -1,4 +1,4 @@
-package indl.lixn.ts.core.callback;
+package indl.lixn.ts.core.listener;
 
 /**
  * @author lixn
@@ -9,4 +9,5 @@ public interface Listener<T> {
 
     void onHappen(T event);
 
+    void onError(T event);
 }

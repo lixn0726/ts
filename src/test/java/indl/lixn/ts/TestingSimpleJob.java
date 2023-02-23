@@ -1,4 +1,4 @@
-package indl.lixn.ts.timerwheel;
+package indl.lixn.ts;
 
 import indl.lixn.ts.core.Id;
 import indl.lixn.ts.core.job.Job;
@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @description Testing Job Details
  * @date 2023/02/20 11:07
  **/
-public class MJob implements Job {
+public class TestingSimpleJob implements Job {
 
     private static final AtomicInteger jobCounter = new AtomicInteger();
 
@@ -24,11 +24,11 @@ public class MJob implements Job {
 
     private final Id id;
 
-    public MJob() {
+    public TestingSimpleJob() {
         this(0);
     }
 
-    public MJob(int secondDiff) {
+    public TestingSimpleJob(int secondDiff) {
         String idStr = "MJob_" + jobCounter.getAndIncrement();
         this.secondDiff = secondDiff;
         this.unmodifiableDiff = secondDiff + TimeUtils.currentTimeInSecond();
@@ -59,11 +59,6 @@ public class MJob implements Job {
     }
 
     @Override
-    public int getPriority() {
-        return 0;
-    }
-
-    @Override
     public long getTimeAsMillis() {
         return TimeUtils.currentTimestampInMillis();
     }
@@ -74,16 +69,8 @@ public class MJob implements Job {
     }
 
     @Override
-    public int getSubmissionTimeAsSeconds() {
-        return 0;
-    }
-
-    @Override
     public boolean isPeriodic() {
         return true;
     }
 
-    public int getTimeGapAsSecond() {
-        return (this.getExecutionTimeAsSeconds() - this.getSubmissionTimeAsSeconds());
-    }
 }

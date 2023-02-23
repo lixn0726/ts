@@ -1,4 +1,4 @@
-package indl.lixn.ts.timerwheel;
+package indl.lixn.ts.core.timerwheel;
 
 import indl.lixn.ts.core.job.Job;
 

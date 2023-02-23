@@ -1,9 +1,9 @@
-package indl.lixn.ts.core.callback;
+package indl.lixn.ts.core.listener.event;
 
 /**
  * @author lixn
  * @description
- * @date 2023/02/21 13:20
+ * @date 2023/02/23 20:49
  **/
 public interface Event {
 }

@@ -1,7 +1,9 @@
-package indl.lixn.ts.timerwheel.v3;
+package indl.lixn.ts.core.timerwheel.impl;
 
 import indl.lixn.ts.common.exception.TsException;
 import indl.lixn.ts.core.job.Job;
+import indl.lixn.ts.core.timerwheel.StorageWheel;
+import indl.lixn.ts.core.timerwheel.TimerWheel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,18 +15,22 @@ import java.util.concurrent.TimeUnit;
  * @description
  * @date 2023/02/23 10:38
  **/
-public class V3JobStoreWheel extends V3BaseTimerWheel {
+public class JobStorageWheel extends BaseTimerWheel implements StorageWheel {
 
     private static final long serialVersionUID = 1_1L;
 
-    private static final Logger log = LoggerFactory.getLogger(V3JobStoreWheel.class);
+    private static final Logger log = LoggerFactory.getLogger(JobStorageWheel.class);
 
-    public V3JobStoreWheel() {
+    public JobStorageWheel() {
         super();
     }
 
-    public V3JobStoreWheel(int tickCount, int durationPerTick, TimeUnit unit) {
+    public JobStorageWheel(int tickCount, int durationPerTick, TimeUnit unit) {
         super(tickCount, durationPerTick, unit);
+    }
+
+    public JobStorageWheel(int tickCount, int durationPerTick, TimeUnit unit, TimerWheel higher, TimerWheel lower) {
+        super(tickCount, durationPerTick, unit, higher, lower);
     }
 
     @Override
@@ -51,20 +57,20 @@ public class V3JobStoreWheel extends V3BaseTimerWheel {
     @Override
     public void addJob(Job job) throws TsException {
         super.addJob(job);
-        System.out.println("JobStoreWheel addJob");
+        log.info("JobStoreWheel addJob");
     }
 
     @Override
     public void movePointer() throws TsException {
-        System.out.println(getIdString() + "当前指针为：" + this.pointer);
+        log.info(getIdString() + "当前指针为：" + this.pointer);
         final List<Job> retainJobs = currentJobs();
         if (!retainJobs.isEmpty()) {
             if (hasNoLowerLayer()) {
                 log.error(getIdString() + "不存在下层时间轮，但是还有待执行的任务等待分配下去");
                 return;
             }
-            System.out.println(getIdString() + "下发任务到下层时间轮");
-            final V3TimerWheel lower = this.getLowerLayer();
+            log.info(getIdString() + "下发任务到下层时间轮");
+            final TimerWheel lower = this.getLowerLayer();
             for (Job job : retainJobs) {
                 lower.addJob(job);
             }

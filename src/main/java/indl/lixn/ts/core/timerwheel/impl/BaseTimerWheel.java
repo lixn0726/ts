@@ -1,26 +1,31 @@
-package indl.lixn.ts.timerwheel.v3;
+package indl.lixn.ts.core.timerwheel.impl;
 
+import indl.lixn.ts.common.IdDispatcher;
 import indl.lixn.ts.common.exception.TsException;
 import indl.lixn.ts.core.Id;
 import indl.lixn.ts.core.job.Job;
-import indl.lixn.ts.timerwheel.IdDispatcher;
-import indl.lixn.ts.timerwheel.WheelNode;
+import indl.lixn.ts.core.timerwheel.TimerWheel;
+import indl.lixn.ts.core.timerwheel.WheelNode;
 import indl.lixn.ts.util.TimeUtils;
 import lombok.Data;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static indl.lixn.ts.common.Constant.TimerConstant.*;
-import static indl.lixn.ts.common.Constant.TimerConstant.TIMER_ARRAY_SIZE;
 
 /**
  * @author lixn
  * @description
  * @date 2023/02/23 10:04
  **/
-public abstract class V3BaseTimerWheel implements V3TimerWheel {
+@Data
+public abstract class BaseTimerWheel implements TimerWheel {
+
+    private static final Logger log = LoggerFactory.getLogger(BaseTimerWheel.class);
 
     /*
      * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -56,9 +61,9 @@ public abstract class V3BaseTimerWheel implements V3TimerWheel {
 
     protected int durationPerTickInSecond;
 
-    protected V3TimerWheel higher;
+    protected TimerWheel higherLayer;
 
-    protected V3TimerWheel lower;
+    protected TimerWheel lowerLayer;
 
     /*
      * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -68,32 +73,38 @@ public abstract class V3BaseTimerWheel implements V3TimerWheel {
      * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
      */
 
-    public V3BaseTimerWheel() {
-        this(IdDispatcher.ofWheel());
+    public BaseTimerWheel() {
+        this(IdDispatcher.ofWheel(), TIMER_TICK_COUNT, TIMER_DURATION_PER_TICK, TIMER_UNIT);
     }
 
-    public V3BaseTimerWheel(Id id) {
+    public BaseTimerWheel(Id id) {
         this(id, TIMER_TICK_COUNT, TIMER_DURATION_PER_TICK, TIMER_UNIT);
     }
 
-    public V3BaseTimerWheel(int tickCount, int durationPerTick, TimeUnit unit) {
+    public BaseTimerWheel(int tickCount, int durationPerTick, TimeUnit unit) {
         this(IdDispatcher.ofWheel(), tickCount, durationPerTick, unit);
     }
 
-    public V3BaseTimerWheel(Id id, int tickCount, int durationPerTick, TimeUnit unit) {
+    public BaseTimerWheel(Id id, int tickCount, int durationPerTick, TimeUnit unit) {
         this(id, tickCount, durationPerTick, unit, TIMER_ARRAY_SIZE);
     }
 
-    public V3BaseTimerWheel(int tickCount, int durationPerTick, TimeUnit unit, int arraySize) {
-        this(IdDispatcher.ofWheel(), tickCount, durationPerTick, unit, TIMER_ARRAY_SIZE);
+    public BaseTimerWheel(Id id, int tickCount, int durationPerTick, TimeUnit unit, int arraySize) {
+        this(id, tickCount, durationPerTick, unit, null, null, arraySize);
     }
 
-    public V3BaseTimerWheel(Id id, int tickCount, int durationPerTick, TimeUnit unit, int arraySize) {
+    public BaseTimerWheel(int tickCount, int durationPerTick, TimeUnit unit, TimerWheel higher, TimerWheel lower) {
+        this(IdDispatcher.ofWheel(), tickCount, durationPerTick, unit, higher, lower, TIMER_ARRAY_SIZE);
+    }
+
+    public BaseTimerWheel(Id id, int tickCount, int durationPerTick, TimeUnit unit, TimerWheel higher, TimerWheel lower, int arraySize) {
         this.id = id;
         this.tickCount = tickCount;
         this.durationPerTick = durationPerTick;
         this.maxInterval = this.tickCount * this.durationPerTick;
         this.unit = unit;
+        this.higherLayer = higher;
+        this.lowerLayer = lower;
         this.arraySize = arraySize;
         this.nodeArray = new WheelNode[arraySize];
         convertToSecond();
@@ -110,28 +121,28 @@ public abstract class V3BaseTimerWheel implements V3TimerWheel {
 
     @Override
     public void addJob(Job job) throws TsException {
-        System.out.println(getIdString() + "添加任务：" + job.getId().getAsString());
+        log.info(getIdString() + "添加任务：" + job.getId().getAsString());
         int jobDiff = getJobDiff(job);
-        System.out.println("该任务的预期运行时间与当前的时间间隔为 " + jobDiff);
+        log.info("该任务的预期运行时间与当前的时间间隔为 " + jobDiff);
         if (exceedTimeLimitation(jobDiff)) {
-            System.out.println("当前任务时间间隔超过当前时间轮的最大间隔，需要放到上层时间轮");
+            log.info("当前任务时间间隔超过当前时间轮的最大间隔，需要放到上层时间轮");
             if (hasNoHigherLayer()) {
 //                throw new TsException(getIdString() + "不存在上层时间轮，且接收到无法存放的Job" + job.getId().getAsString());
-                System.out.println(getIdString() + "不存在上层时间轮，且接收到无法存放的Job" + job.getId().getAsString());
+                log.info(getIdString() + "不存在上层时间轮，且接收到无法存放的Job" + job.getId().getAsString());
                 return;
             }
-            final V3TimerWheel higher = this.higher;
+            final TimerWheel higher = this.higherLayer;
             higher.addJob(job);
             return;
         }
         int nodeIndex = getNodeIndex(jobDiff);
-        System.out.println(getIdString() + "存放任务：" + job.getId().getAsString() + "到：" + nodeIndex);
+        log.info(getIdString() + "存放任务：" + job.getId().getAsString() + "到：" + nodeIndex);
         this.nodeArray[nodeIndex].addJob(job);
     }
 
     private int getNodeIndex(int jobDiff) {
         int originIndex = ((jobDiff / this.durationPerTickInSecond) - 1 + this.pointer);
-        System.out.println("计算出 originIndex为：" + originIndex);
+        log.info("计算出 originIndex为：" + originIndex);
         if ((jobDiff % this.durationPerTickInSecond) != 0) {
             originIndex++;
         }
@@ -139,23 +150,23 @@ public abstract class V3BaseTimerWheel implements V3TimerWheel {
     }
 
     @Override
-    public V3TimerWheel getHigherLayer() {
-        return this.higher;
+    public TimerWheel getHigherLayer() {
+        return this.higherLayer;
     }
 
     @Override
-    public V3TimerWheel getLowerLayer() {
-        return this.lower;
+    public TimerWheel getLowerLayer() {
+        return this.lowerLayer;
     }
 
     @Override
-    public void setLowerLayer(V3TimerWheel lower) {
-        this.lower = lower;
+    public void setLowerLayer(TimerWheel lower) {
+        this.lowerLayer = lower;
     }
 
     @Override
-    public void setHigherLayer(V3TimerWheel higher) {
-        this.higher = higher;
+    public void setHigherLayer(TimerWheel higher) {
+        this.higherLayer = higher;
     }
 
     @Override
@@ -182,7 +193,7 @@ public abstract class V3BaseTimerWheel implements V3TimerWheel {
         if (isRunning()) {
             throw new TsException(this.id.getAsString() + "不能被重复开启");
         }
-        System.out.println(this.id.getAsString() + "开始转动");
+        log.info(this.id.getAsString() + "开始转动");
         this.start = true;
         this.stop = false;
         this.pause = false;
@@ -244,18 +255,18 @@ public abstract class V3BaseTimerWheel implements V3TimerWheel {
     }
 
     public boolean hasNoHigherLayer() {
-        return this.higher == null;
+        return this.higherLayer == null;
     }
 
     public boolean hasNoLowerLayer() {
-        return this.lower == null;
+        return this.lowerLayer == null;
     }
 
     public int getJobDiff(Job job) {
         int jobTime = job.getExecutionTimeAsSeconds();
-        System.out.println(job.getId().getAsString() + "预计执行时间为：" + jobTime);
+        log.info(job.getId().getAsString() + "预计执行时间为：" + jobTime);
         int curTime = TimeUtils.currentTimeInSecond();
-        System.out.println("当前时间为：" + curTime);
+        log.info("当前时间为：" + curTime);
         return jobTime - curTime;
     }
 
@@ -274,66 +285,4 @@ public abstract class V3BaseTimerWheel implements V3TimerWheel {
         this.durationPerTickInSecond = TimeUtils.toSecond(this.unit, this.durationPerTick);
     }
 
-    /// getter
-
-
-    public Id getId() {
-        return id;
-    }
-
-    public int getPointer() {
-        return pointer;
-    }
-
-    public WheelNode[] getNodeArray() {
-        return nodeArray;
-    }
-
-    public int getTickCount() {
-        return tickCount;
-    }
-
-    public int getDurationPerTick() {
-        return durationPerTick;
-    }
-
-    public TimeUnit getUnit() {
-        return unit;
-    }
-
-    public int getArraySize() {
-        return arraySize;
-    }
-
-    public boolean isStart() {
-        return start;
-    }
-
-    public boolean isStop() {
-        return stop;
-    }
-
-    public boolean isPause() {
-        return pause;
-    }
-
-    public int getMaxInterval() {
-        return maxInterval;
-    }
-
-    public int getMaxIntervalInSecond() {
-        return maxIntervalInSecond;
-    }
-
-    public int getDurationPerTickInSecond() {
-        return durationPerTickInSecond;
-    }
-
-    public V3TimerWheel getHigher() {
-        return higher;
-    }
-
-    public V3TimerWheel getLower() {
-        return lower;
-    }
 }

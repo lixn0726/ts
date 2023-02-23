@@ -10,8 +10,12 @@ import java.lang.annotation.*;
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface TSJob {
+public @interface TsJob {
+
+    String id() default "";
 
     String timeExpression() default "";
+
+    String expressionFormat() default "";
 
 }

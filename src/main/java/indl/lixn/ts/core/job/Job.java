@@ -19,11 +19,7 @@ public interface Job {
 
     boolean isPeriodic();
 
-    int getPriority();
-
     int getExecutionTimeAsSeconds();
-
-    int getSubmissionTimeAsSeconds();
 
     long getTimeAsMillis();
 }

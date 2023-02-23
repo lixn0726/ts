@@ -1,7 +1,9 @@
-package indl.lixn.ts.timerwheel.v3;
+package indl.lixn.ts.core.timerwheel.impl;
 
 import indl.lixn.ts.common.exception.TsException;
 import indl.lixn.ts.core.job.Job;
+import indl.lixn.ts.core.timerwheel.ExecutionWheel;
+import indl.lixn.ts.core.timerwheel.TimerWheel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,20 +14,27 @@ import java.util.concurrent.TimeUnit;
  * @description
  * @date 2023/02/23 10:33
  **/
-public class V3JobExecuteWheel extends V3BaseTimerWheel {
+public class JobExecutionWheel extends BaseTimerWheel implements ExecutionWheel {
 
     private static final long serialVersionUID = 1_0L;
 
-    private static final Logger log = LoggerFactory.getLogger(V3JobExecuteWheel.class);
+    private static final Logger log = LoggerFactory.getLogger(JobExecutionWheel.class);
 
-    public V3JobExecuteWheel() {
+    public JobExecutionWheel() {
         super();
     }
 
-    public V3JobExecuteWheel(int tickCount, int durationPerTick, TimeUnit unit) {
+    public JobExecutionWheel(int tickCount, int durationPerTick, TimeUnit unit) {
         super(tickCount, durationPerTick, unit);
     }
 
+    public JobExecutionWheel(int tickCount, int durationPerTick, TimeUnit unit, TimerWheel higher) {
+        this(tickCount, durationPerTick, unit, higher, null);
+    }
+
+    public JobExecutionWheel(int tickCount, int durationPerTick, TimeUnit unit, TimerWheel higher, TimerWheel lower) {
+        super(tickCount, durationPerTick, unit, higher, null);
+    }
     @Override
     protected void doStart() {
         new Thread(() -> {
@@ -62,25 +71,25 @@ public class V3JobExecuteWheel extends V3BaseTimerWheel {
     }
 
     @Override
-    public void setLowerLayer(V3TimerWheel lower) {
+    public void setLowerLayer(TimerWheel lower) {
         throw new TsException(getIdString() + "属于任务执行时间轮，不可拥有下层时间轮");
     }
 
     @Override
-    public V3TimerWheel getLowerLayer() {
+    public TimerWheel getLowerLayer() {
         throw new TsException(getIdString() + "属于任务执行时间轮，不可拥有下层时间轮");
     }
 
     @Override
-    public void movePointer() throws TsException {
-        System.out.println(getIdString() + "当前指针为" + this.pointer);
+    public void movePointer() {
+        log.info(getIdString() + "当前指针为" + this.pointer);
         this.pointer++;
         if (ranAround()) {
-            System.out.println(getIdString() + "执行了一圈");
+            log.info(getIdString() + "执行了一圈");
             if (hasNoHigherLayer()) {
-                System.out.println(getIdString() + "不存在上层时间轮");
+                log.info(getIdString() + "不存在上层时间轮");
             } else {
-                final V3TimerWheel higher = this.getHigherLayer();
+                final TimerWheel higher = this.getHigherLayer();
                 higher.movePointer();
             }
         }
@@ -88,7 +97,7 @@ public class V3JobExecuteWheel extends V3BaseTimerWheel {
         try {
             this.unit.sleep(this.durationPerTick);
         } catch (Exception ex) {
-            System.out.println(getIdString() + "休眠出错");
+            log.info(getIdString() + "休眠出错");
         }
     }
 }

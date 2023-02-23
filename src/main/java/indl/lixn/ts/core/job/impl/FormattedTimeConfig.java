@@ -2,7 +2,6 @@ package indl.lixn.ts.core.job.impl;
 
 import indl.lixn.ts.common.exception.TsException;
 import indl.lixn.ts.core.job.JobTimeConfig;
-import indl.lixn.ts.util.TimeUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

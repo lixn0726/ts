@@ -5,8 +5,8 @@ package indl.lixn.ts.persistence;
  * @description
  * @date 2023/02/16 15:29
  **/
-public interface Storage {
+public interface StorageHandler {
 
-
+    StorageType getStorageType();
 
 }

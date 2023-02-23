@@ -1,4 +1,4 @@
-package indl.lixn.ts.timerwheel.v3;
+package indl.lixn.ts.core.timerwheel;
 
 import indl.lixn.ts.common.exception.TsException;
 import indl.lixn.ts.core.job.Job;
@@ -11,7 +11,7 @@ import java.util.List;
  * @description
  * @date 2023/02/23 09:51
  **/
-public interface V3TimerWheel extends Serializable {
+public interface TimerWheel extends Serializable {
 
     void start() throws TsException;
 
@@ -37,11 +37,11 @@ public interface V3TimerWheel extends Serializable {
     
     String getIdString() throws TsException;
 
-    V3TimerWheel getHigherLayer();
+    TimerWheel getHigherLayer();
 
-    V3TimerWheel getLowerLayer();
+    TimerWheel getLowerLayer();
 
-    void setLowerLayer(V3TimerWheel lower);
+    void setLowerLayer(TimerWheel lower);
 
-    void setHigherLayer(V3TimerWheel higher);
+    void setHigherLayer(TimerWheel higher);
 }
