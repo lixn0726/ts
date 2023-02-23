@@ -1,5 +1,6 @@
 package indl.lixn.ts;
 
+import indl.lixn.ts.util.TimeUtils;
 import org.junit.jupiter.api.Test;
 
 import java.text.ParseException;
@@ -87,6 +88,8 @@ public class CommonTest {
 
     @Test
     public void virtual_job_place_index_expression() {
+        int curSecond = TimeUtils.currentTimeInSecond();
+        System.out.println(curSecond);
 
     }
 

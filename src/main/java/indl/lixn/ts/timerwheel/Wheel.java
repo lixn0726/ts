@@ -133,7 +133,7 @@ public class Wheel {
     }
 
     private int getPlacementIndex(Job job) {
-        int gapAsSecond = job.getExecutionTimeAsSeconds() - TimeUtils.currentTimeAsSecond();
+        int gapAsSecond = job.getExecutionTimeAsSeconds() - TimeUtils.currentTimeInSecond();
         if (gapAsSecond > this.maxInterval) {
             // 该层次的时间轮装不下，需要存到更高层级的去。
             repositionJobsToUpper(job);

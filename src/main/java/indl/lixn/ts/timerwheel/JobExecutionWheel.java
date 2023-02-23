@@ -2,7 +2,6 @@ package indl.lixn.ts.timerwheel;
 
 import indl.lixn.ts.core.Id;
 import indl.lixn.ts.core.job.Job;
-import indl.lixn.ts.timerwheel.interfaces.TimerWheel;
 import indl.lixn.ts.util.TimeUtils;
 import lombok.Data;
 import org.slf4j.Logger;
@@ -81,7 +80,7 @@ public class JobExecutionWheel {
 
     public void addJob(Job job) {
         int timeAsSecond = job.getExecutionTimeAsSeconds();
-        int currentSecond = TimeUtils.currentTimeAsSecond();
+        int currentSecond = TimeUtils.currentTimeInSecond();
         int diff = this.pointer + timeAsSecond - currentSecond;
         if (needToReposition(diff)) {
             System.out.println(this.id.getAsString() + " >>> 需要往上层添加Job");

@@ -20,6 +20,8 @@ public class MJob implements Job {
 
     private final int secondDiff;
 
+    private final int unmodifiableDiff;
+
     private final Id id;
 
     public MJob() {
@@ -29,6 +31,7 @@ public class MJob implements Job {
     public MJob(int secondDiff) {
         String idStr = "MJob_" + jobCounter.getAndIncrement();
         this.secondDiff = secondDiff;
+        this.unmodifiableDiff = secondDiff + TimeUtils.currentTimeInSecond();
         this.id = () -> idStr;
     }
 
@@ -40,7 +43,7 @@ public class MJob implements Job {
     @Override
     public JobContent getContent() {
         return () -> {
-            int currentSecond = TimeUtils.currentTimeAsSecond();
+            int currentSecond = TimeUtils.currentTimeInSecond();
             System.out.println(this.getId().getAsString() + " --- execution at --- " + currentSecond);
         };
     }
@@ -67,7 +70,7 @@ public class MJob implements Job {
 
     @Override
     public int getExecutionTimeAsSeconds() {
-        return TimeUtils.currentTimeAsSecond() + secondDiff;
+        return this.unmodifiableDiff;
     }
 
     @Override

@@ -6,6 +6,8 @@ import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import static indl.lixn.ts.common.Constant.ZERO;
+
 /**
  * @author lixn
  * @description
@@ -35,7 +37,7 @@ public class TimeUtils {
         return System.currentTimeMillis();
     }
 
-    public static int currentTimeAsSecond() {
+    public static int currentTimeInSecond() {
         return (int) (currentTimestampInMillis() / 1000);
     }
 
@@ -55,6 +57,10 @@ public class TimeUtils {
     public static int transformToSecond(int variable, TimeUnit unit) {
         // TODO 有必要用BigDecimal吗
         return (scaleByUnit.get(unit) * variable);
+    }
+
+    public static int toSecond(TimeUnit unit, int num) {
+        return toSecond(unit, num, ZERO);
     }
 
     public static int toSecond(TimeUnit unit, int num, int secondLeft) {

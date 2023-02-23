@@ -2,6 +2,9 @@ package indl.lixn.ts;
 
 import indl.lixn.ts.timerwheel.JobExecutionWheel;
 import indl.lixn.ts.timerwheel.MJob;
+import indl.lixn.ts.timerwheel.v2.BottomTimerWheel;
+import indl.lixn.ts.timerwheel.v2.HigherTimerWheel;
+import indl.lixn.ts.util.TimeUtils;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.TimeUnit;
@@ -29,7 +32,7 @@ public class TimeWheelTest {
 //            @Override
 //            public JobContent getContent() {
 //                return () -> {
-//                    System.out.println("Child JobContent >>> now Running at time : " + TimeUtils.currentTimeAsSecond());
+//                    System.out.println("Child JobContent >>> now Running at time : " + TimeUtils.currentTimeInSecond());
 //                };
 //            }
 //
@@ -55,7 +58,7 @@ public class TimeWheelTest {
 //
 //            @Override
 //            public int getExecutionTimeAsSeconds() {
-//                return TimeUtils.currentTimeAsSecond() + 3;
+//                return TimeUtils.currentTimeInSecond() + 3;
 //            }
 //
 //            @Override
@@ -73,7 +76,7 @@ public class TimeWheelTest {
 //            @Override
 //            public JobContent getContent() {
 //                return () -> {
-//                    System.out.println("Upper JobContent >>> now Running at time : " + TimeUtils.currentTimeAsSecond());
+//                    System.out.println("Upper JobContent >>> now Running at time : " + TimeUtils.currentTimeInSecond());
 //                };
 //            }
 //
@@ -99,7 +102,7 @@ public class TimeWheelTest {
 //
 //            @Override
 //            public int getExecutionTimeAsSeconds() {
-//                return TimeUtils.currentTimeAsSecond();
+//                return TimeUtils.currentTimeInSecond();
 //            }
 //
 //            @Override
@@ -139,5 +142,34 @@ public class TimeWheelTest {
         wheel.startScanner();
 
         TimeUnit.SECONDS.sleep(120);
+    }
+
+    @Test
+    public void test_v2TimerWheel() throws Exception {
+        BottomTimerWheel wheel = new BottomTimerWheel(10, 1, TimeUnit.SECONDS, null);
+
+        HigherTimerWheel higher = new HigherTimerWheel(60, 1, TimeUnit.MINUTES,
+                null, wheel);
+
+        wheel.setUpper(higher);
+        higher.setLower(wheel);
+
+        wheel.start();
+        higher.start();
+
+        wheel.addJob(new MJob(15));
+
+//        wheel.addJob(new MJob(30)); // 0 -
+//        wheel.addJob(new MJob(90));
+//        wheel.addJob(new MJob(60)); // 1
+//        wheel.addJob(new MJob(10)); // 2
+
+//        TimeUnit.SECONDS.sleep(5);
+//        wheel.addJob(new MJob(10));  // 3
+//
+//        wheel.addJob(new MJob(70)); // 4
+
+        TimeUnit.SECONDS.sleep(900);
+
     }
 }
