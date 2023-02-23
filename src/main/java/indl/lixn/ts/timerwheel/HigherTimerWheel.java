@@ -1,11 +1,10 @@
-package indl.lixn.ts.timerwheel.v2;
+package indl.lixn.ts.timerwheel;
 
 import indl.lixn.ts.common.exception.TsException;
 import indl.lixn.ts.core.job.Job;
 import indl.lixn.ts.util.TimeUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 

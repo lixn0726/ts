@@ -1,10 +1,12 @@
 package indl.lixn.ts;
 
-import indl.lixn.ts.timerwheel.JobExecutionWheel;
 import indl.lixn.ts.timerwheel.MJob;
-import indl.lixn.ts.timerwheel.v2.BottomTimerWheel;
-import indl.lixn.ts.timerwheel.v2.HigherTimerWheel;
-import indl.lixn.ts.util.TimeUtils;
+import indl.lixn.ts.timerwheel.BottomTimerWheel;
+import indl.lixn.ts.timerwheel.HigherTimerWheel;
+import indl.lixn.ts.timerwheel.v3.V3BaseTimerWheel;
+import indl.lixn.ts.timerwheel.v3.V3JobExecuteWheel;
+import indl.lixn.ts.timerwheel.v3.V3JobStoreWheel;
+import indl.lixn.ts.timerwheel.v3.V3TimerWheel;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.TimeUnit;
@@ -126,27 +128,8 @@ public class TimeWheelTest {
     }
 
     @Test
-    public void test_isWheelRunNormally() throws Exception {
-        // 0
-        JobExecutionWheel wheel = new JobExecutionWheel();
-
-        // 1
-        JobExecutionWheel upperWheel = new JobExecutionWheel(60, 1, TimeUnit.MINUTES);
-        wheel.setUpperLayer(upperWheel);
-
-        wheel.addJob(new MJob(30)); // 0 -
-        wheel.addJob(new MJob(90));
-        wheel.addJob(new MJob(60));
-        wheel.addJob(new MJob(10));
-
-        wheel.startScanner();
-
-        TimeUnit.SECONDS.sleep(120);
-    }
-
-    @Test
     public void test_v2TimerWheel() throws Exception {
-        BottomTimerWheel wheel = new BottomTimerWheel(10, 1, TimeUnit.SECONDS, null);
+        BottomTimerWheel wheel = new BottomTimerWheel(60, 1, TimeUnit.SECONDS, null);
 
         HigherTimerWheel higher = new HigherTimerWheel(60, 1, TimeUnit.MINUTES,
                 null, wheel);
@@ -156,20 +139,28 @@ public class TimeWheelTest {
 
         wheel.start();
         higher.start();
-
-        wheel.addJob(new MJob(15));
-
-//        wheel.addJob(new MJob(30)); // 0 -
-//        wheel.addJob(new MJob(90));
-//        wheel.addJob(new MJob(60)); // 1
-//        wheel.addJob(new MJob(10)); // 2
-
-//        TimeUnit.SECONDS.sleep(5);
-//        wheel.addJob(new MJob(10));  // 3
-//
-//        wheel.addJob(new MJob(70)); // 4
+        wheel.addJob(new MJob(60));
+        wheel.addJob(new MJob(70));
 
         TimeUnit.SECONDS.sleep(900);
+
+    }
+
+    @Test
+    public void test_v3TimerWheel() throws Exception {
+        V3TimerWheel bottom = new V3JobExecuteWheel(60, 1, TimeUnit.SECONDS);
+
+        V3TimerWheel higher = new V3JobStoreWheel(60, 1, TimeUnit.MINUTES);
+
+        bottom.setHigherLayer(higher);
+        higher.setLowerLayer(bottom);
+
+
+        bottom.start();
+//        TimeUnit.SECONDS.sleep(5);
+        bottom.addJob(new MJob(60));
+
+        TimeUnit.SECONDS.sleep(600);
 
     }
 }

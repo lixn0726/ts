@@ -17,13 +17,13 @@ public interface Job {
 
     JobTimeConfig getExecutionTimeConfig();
 
-    int getPriority();
+    boolean isPeriodic();
 
-    long getTimeAsMillis();
+    int getPriority();
 
     int getExecutionTimeAsSeconds();
 
     int getSubmissionTimeAsSeconds();
 
-    boolean isPeriodic();
+    long getTimeAsMillis();
 }

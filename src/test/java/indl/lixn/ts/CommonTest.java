@@ -87,6 +87,15 @@ public class CommonTest {
     }
 
     @Test
+    public void test_indexGet() {
+        int jobDiff = 60;
+        int interval = 60;
+        int round = jobDiff / interval;
+        int index = jobDiff % interval;
+        System.out.println("层级" + round + " 坐标" + index);
+    }
+
+    @Test
     public void virtual_job_place_index_expression() {
         int curSecond = TimeUtils.currentTimeInSecond();
         System.out.println(curSecond);

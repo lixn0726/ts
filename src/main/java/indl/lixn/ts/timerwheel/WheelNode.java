@@ -21,7 +21,9 @@ public class WheelNode {
     }
 
     public List<Job> getJobs() {
-        return this.jobList;
+        final List<Job> curJobs = this.jobList;
+        this.jobList = new ArrayList<>();
+        return curJobs;
     }
 
 }

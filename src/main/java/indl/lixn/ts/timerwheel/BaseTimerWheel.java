@@ -1,8 +1,7 @@
-package indl.lixn.ts.timerwheel.v2;
+package indl.lixn.ts.timerwheel;
 
 import indl.lixn.ts.common.exception.TsException;
 import indl.lixn.ts.core.Id;
-import indl.lixn.ts.timerwheel.WheelNode;
 import lombok.Data;
 
 import java.util.concurrent.TimeUnit;

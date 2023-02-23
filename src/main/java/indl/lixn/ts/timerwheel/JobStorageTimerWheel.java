@@ -1,4 +1,4 @@
-package indl.lixn.ts.timerwheel.v2;
+package indl.lixn.ts.timerwheel;
 
 import indl.lixn.ts.common.exception.TsException;
 import indl.lixn.ts.core.job.Job;
@@ -10,7 +10,9 @@ import java.util.List;
  * @description
  * @date 2023/02/21 22:01
  **/
-public interface JobExecutionTimerWheel extends TimerWheel {
+public interface JobStorageTimerWheel extends TimerWheel {
+
+    void repositionToLowerLayer(Job job);
 
     default void repositionJobToUpperLayer(List<Job> jobList) {
         final List<Job> jobs = jobList;

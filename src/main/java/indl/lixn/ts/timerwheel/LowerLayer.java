@@ -1,4 +1,4 @@
-package indl.lixn.ts.timerwheel.v2;
+package indl.lixn.ts.timerwheel;
 
 /**
  * @author lixn
