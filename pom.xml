@@ -2,45 +2,82 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.7.8</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
+
     <groupId>indl.lixn</groupId>
     <artifactId>ts</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>ts</name>
     <description>ts</description>
+
+
+    <!--    子模块-->
+    <modules>
+        <module>ts-common</module>
+        <module>ts-infrastructure</module>
+        <module>ts-core</module>
+        <module>ts-wheel</module>
+        <module>ts-interfaces</module>
+    </modules>
+
+    <packaging>pom</packaging>
+
+
+<!--    版本属性管理-->
     <properties>
         <java.version>1.8</java.version>
+        <lombok.version>1.18.24</lombok.version>
+        <spring-boot.version>2.7.8</spring-boot.version>
     </properties>
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-        </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
+<!--    依赖声明，这里只是声明版本，后续在子工程中，再使用这里有的maven依赖时，可以不声明版本，在这里进行统一的依赖管理-->
+    <dependencyManagement>
 
-        <!--        lombok-->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
+        <dependencies>
 
-    </dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
 
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-web</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <version>${spring-boot.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!--        lombok-->
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+            </dependency>
+
+        </dependencies>
+
+    </dependencyManagement>
+
+<!--    编译管理 jdk版本和字符集编码-->
     <build>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+
             </plugin>
         </plugins>
     </build>
