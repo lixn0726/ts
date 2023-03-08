@@ -3,7 +3,7 @@ package indl.lixn.ts.core.listener;
 /**
  * @author lixn
  * @description
- * @date 2023/02/23 20:52
+ * @date 2023/02/24 14:43
  **/
-public class Manager {
+public interface Event {
 }

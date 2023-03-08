@@ -9,4 +9,6 @@ public interface PeriodicJob extends Job {
 
     int getRepeatCount();
 
+    int getPeriod();
+
 }

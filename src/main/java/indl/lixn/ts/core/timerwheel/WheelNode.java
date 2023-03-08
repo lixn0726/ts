@@ -4,6 +4,7 @@ import indl.lixn.ts.core.job.Job;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author lixn
@@ -22,7 +23,9 @@ public class WheelNode {
 
     public List<Job> getJobs() {
         final List<Job> curJobs = this.jobList;
-        this.jobList = new ArrayList<>();
+        // TODO 是分多一个时间轮来专门执行可重复任务还是直接遍历呢
+        // TODO parallelStream的坑 --- ?
+        this.jobList = this.jobList.parallelStream().filter(Job::isPeriodic).collect(Collectors.toList());
         return curJobs;
     }
 

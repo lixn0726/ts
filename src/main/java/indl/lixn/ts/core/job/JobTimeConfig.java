@@ -9,4 +9,6 @@ public interface JobTimeConfig {
 
     long transformAsTimestamp();
 
+    int transformInSecond();
+
 }

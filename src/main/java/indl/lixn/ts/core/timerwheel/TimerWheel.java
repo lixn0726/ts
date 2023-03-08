@@ -11,7 +11,7 @@ import java.util.List;
  * @description
  * @date 2023/02/23 09:51
  **/
-public interface TimerWheel extends Serializable {
+public interface TimerWheel {
 
     void start() throws TsException;
 

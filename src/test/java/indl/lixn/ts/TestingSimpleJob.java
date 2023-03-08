@@ -5,7 +5,7 @@ import indl.lixn.ts.core.job.Job;
 import indl.lixn.ts.core.job.JobContent;
 import indl.lixn.ts.core.job.JobExecutor;
 import indl.lixn.ts.core.job.JobTimeConfig;
-import indl.lixn.ts.util.TimeUtils;
+import indl.lixn.ts.common.util.TimeUtils;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

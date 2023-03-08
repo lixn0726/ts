@@ -157,7 +157,6 @@ public class TimeWheelTest {
                 .withTickCount(30)
                 .withDurationPerTick(1)
                 .withUnit(TimeUnit.MINUTES)
-                .executable()
                 .build();
 
         bottom.setHigherLayer(higher);

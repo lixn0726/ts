@@ -1,6 +1,6 @@
 package indl.lixn.ts;
 
-import indl.lixn.ts.util.TimeUtils;
+import indl.lixn.ts.common.util.TimeUtils;
 import org.junit.jupiter.api.Test;
 
 import java.text.ParseException;
@@ -99,6 +99,12 @@ public class CommonTest {
     public void virtual_job_place_index_expression() {
         int curSecond = TimeUtils.currentTimeInSecond();
         System.out.println(curSecond);
+
+    }
+
+    @Test
+    public void test_longCompareTo() {
+        long syncPeriod = 60 * 1000;
 
     }
 

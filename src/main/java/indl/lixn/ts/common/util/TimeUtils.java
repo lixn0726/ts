@@ -1,4 +1,4 @@
-package indl.lixn.ts.util;
+package indl.lixn.ts.common.util;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -21,7 +21,7 @@ public class FormattedTimeConfig implements JobTimeConfig {
 
     private static final Map<String, SimpleDateFormat> formatterByTimeExpression = new ConcurrentHashMap<>();
 
-    private long timestamp;
+    private final long timestamp;
 
     static {
         formatterByTimeExpression.put(DEFAULT_FORMAT, DEFAULT_FORMATTER);
@@ -36,7 +36,7 @@ public class FormattedTimeConfig implements JobTimeConfig {
         try {
             Date date = formatter.parse(formattedTimeStr);
             if (date.before(new Date())) {
-                // TODO 该怎么处理呢
+                this.timestamp = Long.MIN_VALUE;
                 return;
             }
             this.timestamp = date.getTime();
@@ -49,6 +49,11 @@ public class FormattedTimeConfig implements JobTimeConfig {
     @Override
     public long transformAsTimestamp() {
         return this.timestamp;
+    }
+
+    @Override
+    public int transformInSecond() {
+        return (int) (this.timestamp / 1000);
     }
 
     private SimpleDateFormat getFormatter(String dateFormat) {

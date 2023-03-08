@@ -4,9 +4,10 @@ import indl.lixn.ts.common.IdDispatcher;
 import indl.lixn.ts.common.exception.TsException;
 import indl.lixn.ts.core.Id;
 import indl.lixn.ts.core.job.Job;
+import indl.lixn.ts.core.timerwheel.SerializableTimerWheel;
 import indl.lixn.ts.core.timerwheel.TimerWheel;
 import indl.lixn.ts.core.timerwheel.WheelNode;
-import indl.lixn.ts.util.TimeUtils;
+import indl.lixn.ts.common.util.TimeUtils;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,7 @@ import static indl.lixn.ts.common.Constant.TimerConstant.*;
  * @date 2023/02/23 10:04
  **/
 @Data
-public abstract class BaseTimerWheel implements TimerWheel {
+public abstract class BaseTimerWheel implements SerializableTimerWheel {
 
     private static final Logger log = LoggerFactory.getLogger(BaseTimerWheel.class);
 

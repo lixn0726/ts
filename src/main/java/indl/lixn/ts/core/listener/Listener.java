@@ -3,11 +3,12 @@ package indl.lixn.ts.core.listener;
 /**
  * @author lixn
  * @description
- * @date 2023/02/21 13:19
+ * @date 2023/02/24 14:37
  **/
-public interface Listener<T> {
+public interface Listener {
 
-    void onHappen(T event);
+    void listen(Event event);
 
-    void onError(T event);
+    void onHappen(Event event);
+
 }
