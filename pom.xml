@@ -24,6 +24,7 @@
         <module>ts-core</module>
         <module>ts-wheel</module>
         <module>ts-interfaces</module>
+        <module>ts-persistence</module>
     </modules>
 
     <packaging>pom</packaging>

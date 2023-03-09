@@ -6,4 +6,7 @@ package indl.lixn.tscommon.job;
  * @date 2023/03/08 20:11
  **/
 public interface JobContent {
+
+    void perform();
+
 }

@@ -36,12 +36,12 @@ public interface TimerWheel {
 
     String getIdString() throws TsException;
 
-    TimerWheel getHigherLayer();
+    TimerWheel getUpper();
 
-    TimerWheel getLowerLayer();
+    TimerWheel getLower();
 
-    void setLowerLayer(TimerWheel lower);
+    void setLower(TimerWheel lower);
 
-    void setHigherLayer(TimerWheel higher);
+    void setUpper(TimerWheel upper);
 
 }
