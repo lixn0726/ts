@@ -7,27 +7,51 @@ import indl.lixn.tscommon.utils.TimeUtils;
 import indl.tswheel.TimerWheel;
 import indl.tswheel.WheelNode;
 import indl.tswheel.abstracts.AbstractTimerWheel;
+import indl.tswheel.enums.TimeUnitDimension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author lixn
  * @description
  * @date 2023/03/09 13:41
  **/
-public class DefaultTimerWheel extends AbstractTimerWheel {
+public class GenericTimerWheel extends AbstractTimerWheel {
 
-    private static final Logger log = LoggerFactory.getLogger(DefaultTimerWheel.class);
+    private static final Logger log = LoggerFactory.getLogger(GenericTimerWheel.class);
 
     private final WheelNode[] nodeArray;
 
-    public DefaultTimerWheel() {
-        super();
+    private boolean basic;
+
+    private final Thread innerScanner;
+
+
+    public GenericTimerWheel() {
+        this(true);
+    }
+
+    public GenericTimerWheel(boolean basic) {
+        this(basic, 60, 1, TimeUnit.SECONDS);
+    }
+
+    public GenericTimerWheel(boolean basic, int tickCount, int durationPerTick, TimeUnit timeUnit) {
+        super(tickCount, durationPerTick, timeUnit);
+        this.basic = basic;
         this.nodeArray = getNodeArray();
+        this.innerScanner = new Thread(new JobScanner());
+        System.out.println("Get Reference From AbstractTimerWheel --- NodeArray : " + Arrays.asList(this.nodeArray));
+    }
+
+    public static void main(String[] args) {
+        GenericTimerWheel base = new GenericTimerWheel();
+        base.start();
     }
 
     @Override
@@ -52,12 +76,35 @@ public class DefaultTimerWheel extends AbstractTimerWheel {
 
     @Override
     public TimerWheel getUpper() {
-        if (hasUpper()) {
-            return super.getUpper();
-        } else {
-            // TODO
+        if (!hasUpper()) {
+            TimeUnitDimension upperDimension = TimeUnitDimension.getUpperUnit(getTimeUnit());
+            if (upperDimension == null) {
+                throw new TsException("已到达系统的最大刻度等级，无法添加任务");
+            }
+            TimerWheel upper = createUpperTimerWheel(upperDimension);
+            setUpper(upper);
         }
-        return null;
+        return super.getUpper();
+    }
+
+    private TimerWheel createUpperTimerWheel(TimeUnitDimension upperDimension) {
+        int tickCount = upperDimension.getLowerScale().getScale();
+        int durationPerTick = 1;
+        TimeUnit timeUnit = upperDimension.getTimeUnit();
+        GenericTimerWheel upper = new GenericTimerWheel(false);
+        upper.setLower(this);
+        setUpper(upper);
+        return upper;
+    }
+
+    private void getJobsToExecute() {
+        final List<Job> executableJobs = currentJobs();
+        if (executableJobs.isEmpty()) {
+            return;
+        }
+        for (Job job : executableJobs) {
+            job.getContent().perform();
+        }
     }
 
     @Override
@@ -102,17 +149,32 @@ public class DefaultTimerWheel extends AbstractTimerWheel {
     }
 
     @Override
-    protected void startTimerWheel() {
+    public void startTimerWheel() {
+        // TODO 给Thread一个name，并且放到线程池里面去管理
+        this.innerScanner.start();
+    }
+
+    @Override
+    public void closeTimerWheel() {
+    }
+
+    @Override
+    public void pauseTimerWheel() {
 
     }
 
     @Override
-    protected void closeTimerWheel() {
-
+    public boolean isBasic() {
+        return this.basic;
     }
 
-    @Override
-    protected void pauseTimerWheel() {
-
+    private class JobScanner implements Runnable {
+        @Override
+        public void run() {
+            while (isRunning()) {
+                getJobsToExecute();
+                movePointer();
+            }
+        }
     }
 }

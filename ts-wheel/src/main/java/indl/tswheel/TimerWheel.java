@@ -24,6 +24,8 @@ public interface TimerWheel {
 
     boolean isPaused() throws TsException;
 
+    boolean isBasic() throws TsException;
+
     void onError() throws TsException;
 
     void addJob(Job job) throws TsException;

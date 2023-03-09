@@ -1,10 +1,13 @@
 package indl.lixn.tscommon.entity;
 
+import lombok.Data;
+
 /**
  * @author lixn
  * @description
  * @date 2023/03/08 21:54
  **/
+@Data
 public class GlobalSystemConfig {
 
     private String instanceId;

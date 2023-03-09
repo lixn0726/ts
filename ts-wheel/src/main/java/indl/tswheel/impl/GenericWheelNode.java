@@ -8,10 +8,10 @@ import java.util.List;
 
 /**
  * @author lixn
- * @description
+ * @description 默认的时间轮节点。只用于存放任务
  * @date 2023/03/09 14:12
  **/
-public class DefaultWheelNode implements WheelNode {
+public class GenericWheelNode implements WheelNode {
     @Override
     public List<Job> getExecutableJobs() {
         return null;

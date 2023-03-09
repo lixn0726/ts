@@ -33,6 +33,10 @@ public enum TimeUnitDimension {
         this.lowerUnit = lowerUnit;
     }
 
+    public TimeUnitDimension getLowerScale() {
+        return this.lowerUnit;
+    }
+
     public static int getScalesToSecond(TimeUnit unit) {
         TimeUnitDimension target = null;
         for (TimeUnitDimension tu : TimeUnitDimension.values()) {
@@ -50,6 +54,15 @@ public enum TimeUnitDimension {
             result *= target.scale;
         }
         return result;
+    }
+
+    public static TimeUnitDimension getUpperUnit(TimeUnit unit) {
+        for (TimeUnitDimension tu : TimeUnitDimension.values()) {
+            if (unit.equals(tu.lowerUnit.timeUnit)) {
+                return tu;
+            }
+        }
+        return null;
     }
 
 }

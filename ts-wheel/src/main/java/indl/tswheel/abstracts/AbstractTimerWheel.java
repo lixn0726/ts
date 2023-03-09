@@ -5,7 +5,7 @@ import indl.tswheel.TimerWheel;
 import indl.tswheel.TimerWheelId;
 import indl.tswheel.WheelNode;
 import indl.tswheel.enums.TimeUnitDimension;
-import indl.tswheel.impl.DefaultWheelNode;
+import indl.tswheel.impl.GenericWheelNode;
 import lombok.Data;
 
 import java.util.concurrent.TimeUnit;
@@ -45,11 +45,22 @@ public abstract class AbstractTimerWheel implements TimerWheel {
     private int secondsLeverDuration;
 
     public AbstractTimerWheel() {
-        this(64);
+        this(60);
     }
 
     public AbstractTimerWheel(int arraySize) {
-        this.nodeArray = new WheelNode[arraySize];
+        this(arraySize, 60, 1, TimeUnit.SECONDS);
+    }
+
+    public AbstractTimerWheel(int tickCount, int durationPerTick, TimeUnit timeUnit) {
+        this(60, tickCount, durationPerTick, timeUnit);
+    }
+
+    public AbstractTimerWheel(int arraySize, int tickCount, int durationPerTick, TimeUnit timeUnit) {
+        this.tickCount = tickCount;
+        this.durationPerTick = durationPerTick;
+        this.timeUnit = timeUnit;
+        initAdditionalProps(arraySize);
     }
 
     protected abstract void startTimerWheel();
@@ -78,7 +89,7 @@ public abstract class AbstractTimerWheel implements TimerWheel {
         return this.secondsLevelTimeInterval;
     }
 
-    private void initAdditionalProps() {
+    private void initAdditionalProps(int arraySize) {
         if (attributesIllegal()) {
             throw new TsException("初始化参数不规范，请检查");
         }
@@ -86,9 +97,9 @@ public abstract class AbstractTimerWheel implements TimerWheel {
                 this.durationPerTick * TimeUnitDimension.getScalesToSecond(this.timeUnit);
         this.secondsLevelTimeInterval =
                 this.tickCount * secondsLeverDuration;
-        final int arrayLength = this.nodeArray.length;
-        for (int i = 0; i < arrayLength; i++) {
-            nodeArray[i] = new DefaultWheelNode();
+        this.nodeArray = new WheelNode[arraySize];
+        for (int i = 0; i < arraySize; i++) {
+            nodeArray[i] = new GenericWheelNode();
         }
     }
 
